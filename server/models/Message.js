@@ -4,16 +4,16 @@ const messageSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,     
+        required: true     
     },
     role: {
         type: String,
         enum: ['user', 'assistant'],
-        required: true, 
+        required: true 
     },
     content: {
         type: String,
-        required: true, 
+        required: true 
     },
 }, { timestamps: true }); 
 
