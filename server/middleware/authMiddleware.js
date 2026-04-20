@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken'); 
 
 const protect = (req, res, next) => {
+    if (!process.env.JWT_SECRET) {
+        console.error("JWT_SECRET environment variable is not defined");
+        return res.status(500).json({ message: "Server configuration error" });
+    };
+
     const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
@@ -12,8 +17,11 @@ const protect = (req, res, next) => {
         req.user = decoded;
         next();
     } catch (error) {
+        if (error.name === 'TokenExpiredError') {
+            return res.status(401).json({ message: 'Token expired' });
+        };
         res.status(401).json({ message: 'Invalid token' });
     }
 }
 
-module.exports =  protect ;
+module.exports = protect ;

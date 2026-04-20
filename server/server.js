@@ -6,7 +6,7 @@ const connectDB = require("./config/db");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: process.env.CORS_ORIGIN || "*", credentials: true }));
 app.use(express.json());
 
 // Health check endpoint
@@ -27,8 +27,7 @@ const port = process.env.PORT || 8000;
       console.log(`Server is running on port ${port}`);
     });
   } catch (error) {
-    console.error('Failed to start server', error);
+    console.error("Failed to start server", error);
     process.exit(1);
   }
 })();
-
