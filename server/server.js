@@ -1,20 +1,25 @@
 require("dotenv").config();
 const express = require("express");
-const cors = require("cors"); 
+const cors = require("cors");
 const connectDB = require("./config/db");
 
+const app = express();
 
-const app = express(); 
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-app.use(cors()); 
-app.use(express.json()); 
+// Health check endpoint
+app.get("/", (req, res) => {
+  res.send("CodeBuddy API is running");
+});
 
-app.get('/', (req, res) => {
-  res.send('CodeBuddy API is running');
-}); 
+// Routes
+app.use("/api/auth", require("./routes/auth"));
 
-const port = process.env.PORT || 8000
+const port = process.env.PORT || 8000;
 
+// Start the server after connecting to the database
 (async () => {
   try {
     await connectDB();
@@ -25,4 +30,5 @@ const port = process.env.PORT || 8000
     console.error('Failed to start server', error);
     process.exit(1);
   }
-})(); 
+})();
+
