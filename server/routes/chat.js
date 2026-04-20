@@ -13,6 +13,9 @@ router.post('/', protect, async (req, res) => {
 
     try {
         const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
         const today = new Date();
         const lastMessageDate = user.lastMessageDate ? new Date(user.lastMessageDate) : null;
 
@@ -55,12 +58,19 @@ unrelated to coding, politely decline and redirect them to ask a coding question
             ]
         });
         
-        const reply = response.content[0].text.trim();
+        const contentBlock = response.content?.[0];
+        if (!contentBlock || contentBlock.type !== 'text' || !contentBlock.text) {
+            console.error('Unexpected response format from Anthropic API:', response);
+            throw new Error('Unexpected response format from AI');
+        }
+        const reply = contentBlock.text.trim();
 
         // Save the user's message and the assistant's reply to the database
         const assistantMessage = reply;
-        await Message.create({ userId, role: 'user', content: message });
-        await Message.create({userId, role: 'assistant', content: assistantMessage });
+        await Message.insertMany([
+            { userId, role: 'user', content: message },
+            { userId, role: 'assistant', content: assistantMessage }
+        ]);
         user.messagesUsedToday += 1;
         user.lastMessageDate = new Date();
         await user.save();
@@ -85,3 +95,5 @@ router.get('/history', protect, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+module.exports = router;
