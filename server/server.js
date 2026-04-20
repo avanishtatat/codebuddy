@@ -16,6 +16,7 @@ app.get("/", (req, res) => {
 
 // Routes
 app.use("/api/auth", require("./routes/auth"));
+app.use("/api/chat", require("./routes/chat"));
 
 const port = process.env.PORT || 8000;
 
