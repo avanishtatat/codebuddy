@@ -67,13 +67,26 @@ unrelated to coding, politely decline and redirect them to ask a coding question
 
         // Save the user's message and the assistant's reply to the database
         const assistantMessage = reply;
-        await Message.insertMany([
-            { userId, role: 'user', content: message },
-            { userId, role: 'assistant', content: assistantMessage }
-        ]);
-        user.messagesUsedToday += 1;
-        user.lastMessageDate = new Date();
-        await user.save();
+        const session = await Message.startSession();
+        session.startTransaction();
+        try {
+            await Message.insertMany([
+                { userId, role: 'user', content: message },
+                { userId, role: 'assistant', content: assistantMessage }
+            ], { session });
+            user.messagesUsedToday += 1;
+            user.lastMessageDate = new Date();
+            await user.save({ session });
+            await session.commitTransaction();
+        } catch (txError) {
+            await session.abortTransaction();
+            console.log('Transaction error:', txError); 
+            throw txError;
+        } finally {
+            session.endSession();
+        }
+        
+        
 
         res.status(201).json({ message: assistantMessage });
     } catch (error) {
