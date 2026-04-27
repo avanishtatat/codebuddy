@@ -2,15 +2,26 @@ import { createContext, useContext, useState } from "react";
 
 export const AuthContext = createContext(); 
 
+const safeJsonParse = (key) => {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : null;
+    } catch (error) {
+        console.error(`Error parsing ${key} from localStorage`, error);
+        localStorage.removeItem(key);
+        return null;
+    }
+}
+
 const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null); 
-    const [token, setToken] = useState(JSON.parse(localStorage.getItem('token')) || null);
+    const [user, setUser] = useState(() => safeJsonParse('user'));; 
+    const [token, setToken] = useState(() => safeJsonParse('token'));
 
     const login = (userData, token) => {
         setUser(userData); 
         setToken(token); 
         localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', JSON.stringify(token));
+        localStorage.setItem('token', token);
     }
 
     const logout = () => {
@@ -27,6 +38,12 @@ const AuthProvider = ({ children }) => {
     )
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+    const context = useContext(AuthContext); 
+    if (context === undefined) {
+        throw new Error("useAuth must be used within an AuthProvider");
+    }
+    return context;
+};
 
 export default AuthProvider;

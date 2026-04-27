@@ -4,12 +4,12 @@ const Message = require('../models/Message');
 const protect = require('../middleware/authMiddleware');
 const User = require('../models/User');
 
-const Anthropic = require('@anthropic-ai/sdk');
+// const Anthropic = require('@anthropic-ai/sdk');
 const GROQ = require('groq-sdk')
 const groqClient = new GROQ({
     apiKey: process.env.GROQ_API_KEY,
 });
-const client = new Anthropic();
+// const client = new Anthropic();
 
 // POST /chat - Create a new message
 router.post('/', protect, async (req, res) => {
@@ -62,8 +62,14 @@ unrelated to coding, politely decline and redirect them to ask a coding question
             ]
         });
 
-        const reply = response.choices[0].message.content.trim();
+        const choice = response.choices?.[0]; 
+        if (!choice?.message?.content) {
+            console.error('Unexpected response format from Groq API:', response);
+            throw new Error('Unexpected response format from AI');
+        }
+        const reply = choice.message.content.trim();
 
+        // For reference, this is the old Anthropic API call we were using before switching to Groq. Keeping it here for now in case we want to compare results or switch back.
         // const response = await client.messages.create({
         //     model: 'claude-sonnet-4-20250514',
         //     max_tokens: 1024,
@@ -82,6 +88,7 @@ unrelated to coding, politely decline and redirect them to ask a coding question
         // const reply = contentBlock.text.trim();
 
         // Save the user's message and the assistant's reply to the database
+        
         const assistantMessage = reply;
         const session = await Message.startSession();
         session.startTransaction();
@@ -96,14 +103,12 @@ unrelated to coding, politely decline and redirect them to ask a coding question
             await session.commitTransaction();
         } catch (txError) {
             await session.abortTransaction();
-            console.log('Transaction error:', txError); 
+            console.error('Transaction error:', txError); 
             throw txError;
         } finally {
             session.endSession();
         }
         
-        
-
         res.status(201).json({ message: assistantMessage });
     } catch (error) {
         if (error?.status === 429) {
