@@ -5,6 +5,10 @@ const protect = require('../middleware/authMiddleware');
 const User = require('../models/User');
 
 const Anthropic = require('@anthropic-ai/sdk');
+const GROQ = require('groq-sdk')
+const groqClient = new GROQ({
+    apiKey: process.env.GROQ_API_KEY,
+});
 const client = new Anthropic();
 
 // POST /chat - Create a new message
@@ -48,22 +52,34 @@ router.post('/', protect, async (req, res) => {
 intermediate developers. Only answer coding-related questions. If asked anything 
 unrelated to coding, politely decline and redirect them to ask a coding question.`;
 
-        const response = await client.messages.create({
-            model: 'claude-sonnet-4-20250514',
+        const response = await groqClient.chat.completions.create({
+            model: 'llama-3.3-70b-versatile',
             max_tokens: 1024,
-            system: SYSTEM_PROMPT,
             messages: [
+                {role: 'system', content: SYSTEM_PROMPT },
                 ...recentMessages.map(msg => ({role: msg.role, content: msg.content })),
-                { role: 'user', content: message }
+                { role: 'user', content: message }  
             ]
         });
+
+        const reply = response.choices[0].message.content.trim();
+
+        // const response = await client.messages.create({
+        //     model: 'claude-sonnet-4-20250514',
+        //     max_tokens: 1024,
+        //     system: SYSTEM_PROMPT,
+        //     messages: [
+        //         ...recentMessages.map(msg => ({role: msg.role, content: msg.content })),
+        //         { role: 'user', content: message }
+        //     ]
+        // });
         
-        const contentBlock = response.content?.[0];
-        if (!contentBlock || contentBlock.type !== 'text' || !contentBlock.text) {
-            console.error('Unexpected response format from Anthropic API:', response);
-            throw new Error('Unexpected response format from AI');
-        }
-        const reply = contentBlock.text.trim();
+        // const contentBlock = response.content?.[0];
+        // if (!contentBlock || contentBlock.type !== 'text' || !contentBlock.text) {
+        //     console.error('Unexpected response format from Anthropic API:', response);
+        //     throw new Error('Unexpected response format from AI');
+        // }
+        // const reply = contentBlock.text.trim();
 
         // Save the user's message and the assistant's reply to the database
         const assistantMessage = reply;
@@ -75,7 +91,7 @@ unrelated to coding, politely decline and redirect them to ask a coding question
                 { userId, role: 'assistant', content: assistantMessage }
             ], { session });
             user.messagesUsedToday += 1;
-            user.lastMessageDate = new Date();
+            user.lastMessageDate = today;
             await user.save({ session });
             await session.commitTransaction();
         } catch (txError) {
@@ -90,6 +106,9 @@ unrelated to coding, politely decline and redirect them to ask a coding question
 
         res.status(201).json({ message: assistantMessage });
     } catch (error) {
+        if (error?.status === 429) {
+            return res.status(503).json({ message: 'Server is busy right now. Please try again in a few moments.' });
+        }
         console.error('Error processing chat message:', error);
         res.status(500).json({ message: 'Server error' });
     }
