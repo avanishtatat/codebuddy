@@ -14,14 +14,14 @@ const safeJsonParse = (key) => {
 }
 
 const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(() => safeJsonParse('user'));; 
+    const [user, setUser] = useState(() => safeJsonParse('user')); 
     const [token, setToken] = useState(() => safeJsonParse('token'));
 
     const login = (userData, token) => {
         setUser(userData); 
         setToken(token); 
         localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', token);
+        localStorage.setItem('token', JSON.stringify(token));
     }
 
     const logout = () => {
