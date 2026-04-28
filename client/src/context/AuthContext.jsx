@@ -15,13 +15,13 @@ const safeJsonParse = (key) => {
 
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() => safeJsonParse('user')); 
-    const [token, setToken] = useState(() => safeJsonParse('token'));
+    const [token, setToken] = useState(() => localStorage.getItem('token') || null);
 
     const login = (userData, token) => {
         setUser(userData); 
         setToken(token); 
         localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('token', JSON.stringify(token));
+        localStorage.setItem('token', token);
     }
 
     const logout = () => {
