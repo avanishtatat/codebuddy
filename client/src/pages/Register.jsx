@@ -23,9 +23,9 @@ const Register = () => {
     const userData = {name, email, password};
     try {
       const response = await axiosInstance.post('/auth/register', userData);
-      const {name, token} = response.data; 
+      const {name: userName, token} = response.data; 
       setError(null); 
-      login({name}, token); 
+      login({name: userName}, token); 
       navigate('/');
     } catch (error) {
       console.error("Registration error:", error);
