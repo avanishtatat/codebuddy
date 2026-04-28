@@ -18,9 +18,13 @@ axiosInstance.interceptors.response.use(response => response, error => {
     if (error.response) {
         // Auto logout when token is invalid or expired
         if (error.response.status === 401) {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
-            window.location.href = "/login"; 
+            // Don't auto-logout for auth endpoints (login/register failures)
+            const authEndpoints = error.config?.url?.startsWith("/auth/");
+            if (!authEndpoints) {
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                window.location.href = "/login"; 
+            }
         }
         console.error("API error response:", {
             status: error.response.status,

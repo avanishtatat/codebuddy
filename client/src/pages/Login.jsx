@@ -24,7 +24,7 @@ const Login = () => {
         navigate('/chat');
         } catch (error) {
             console.error("Login error:", error);
-            setError(error.message || "Login failed. Please try again.");
+            setError(error?.response?.data?.message || error?.message || "Login failed. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -37,10 +37,12 @@ const Login = () => {
             
             <form className='w-5/6 md:w-2/6 flex flex-col gap-y-5 items-center mb-6 p-4' onSubmit={handleSubmit}>
                 <div className='h-12 bg-slate-200 rounded-lg w-full'>
-                    <input id='email' type="text" placeholder='Email' className='px-6 m-auto w-full h-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500' value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    <label htmlFor='email' className='sr-only'>Email</label>
+                    <input id='email' type="email" placeholder='john@example.com' className='px-6 m-auto w-full h-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500' value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className='h-12 bg-slate-200 rounded-lg w-full'>
-                    <input id='password' type="password" placeholder='Password' className='px-6 m-auto w-full h-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500' value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <label htmlFor='password' className='sr-only'>Password</label>
+                    <input id='password' type="password" placeholder='********' className='px-6 m-auto w-full h-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500' value={password} onChange={(e) => setPassword(e.target.value)} required />
                     
                 </div>
                 <button type='submit' className='px-6 py-3 w-full bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition' disabled={loading}>{loading ? "Logging In..." : "Log In"}</button>
