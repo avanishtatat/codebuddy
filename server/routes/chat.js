@@ -128,9 +128,15 @@ router.get('/history', protect, async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
+        const today = new Date(); 
+        const lastMessageDate = user.lastMessageDate ? new Date(user.lastMessageDate) : null; 
+        let messagesUsedToday = user.messagesUsedToday;
+        if (!lastMessageDate || lastMessageDate.toDateString() !== today.toDateString()) {
+            messagesUsedToday = 0;
+        }
         const messages = await Message.find({ userId }).sort({ createdAt: -1 }).limit(50);
         messages.reverse(); // flip oldest first for better display
-        res.status(200).json({ messages, messagesUsedToday: user.messagesUsedToday });
+        res.status(200).json({ messages, messagesUsedToday });
     } catch (error) {
         console.error('Error fetching chat history:', error);
         res.status(500).json({ message: 'Server error' });
