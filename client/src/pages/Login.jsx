@@ -44,7 +44,7 @@ const Login = () => {
             <form className='w-5/6 md:w-2/6 flex flex-col gap-y-5 items-center mb-6 p-4' onSubmit={handleSubmit}>
                 <div className='h-12 bg-slate-200 rounded-lg w-full'>
                     <label htmlFor='email' className='sr-only'>Email</label>
-                    <input id='email' type="email" placeholder='john@example.com' autoComplete='email' className='px-6 m-auto w-full h-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500' value={email} onChange={(e) => setEmail(e.target.value)} required />
+                    <input id='email' type="email" placeholder='avanish@example.com' autoComplete='email' className='px-6 m-auto w-full h-full rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500' value={email} onChange={(e) => setEmail(e.target.value)} required />
                 </div>
                 <div className='h-12 bg-slate-200 rounded-lg w-full'>
                     <label htmlFor='password' className='sr-only'>Password</label>
