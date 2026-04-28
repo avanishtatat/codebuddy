@@ -109,7 +109,7 @@ unrelated to coding, politely decline and redirect them to ask a coding question
             session.endSession();
         }
         
-        res.status(201).json({ message: assistantMessage });
+        res.status(201).json({ message: assistantMessage, messagesUsedToday: user.messagesUsedToday });
     } catch (error) {
         if (error?.status === 429) {
             return res.status(503).json({ message: 'Server is busy right now. Please try again in a few moments.' });
@@ -124,9 +124,13 @@ router.get('/history', protect, async (req, res) => {
     const userId = req.user.id;
 
     try {
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
         const messages = await Message.find({ userId }).sort({ createdAt: -1 }).limit(50);
         messages.reverse(); // flip oldest first for better display
-        res.status(200).json({ messages });
+        res.status(200).json({ messages, messagesUsedToday: user.messagesUsedToday });
     } catch (error) {
         console.error('Error fetching chat history:', error);
         res.status(500).json({ message: 'Server error' });
