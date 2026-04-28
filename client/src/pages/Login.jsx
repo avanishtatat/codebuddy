@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext';
 import axiosInstance from '../api/axios';
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, Navigate } from 'react-router-dom'
 
 const Login = () => {
     const [email, setEmail] = useState(''); 
@@ -10,7 +10,12 @@ const Login = () => {
     const [error, setError] = useState(null);
     const {login} = useAuth();
     const navigate = useNavigate();
+    const { token } = useAuth();
 
+    if (token) {
+        return <Navigate to="/" />
+    }
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -21,7 +26,7 @@ const Login = () => {
         const {name, token} = response.data
         setError(null);
         login({name}, token); 
-        navigate('/chat');
+        navigate('/');
         } catch (error) {
             console.error("Login error:", error);
             setError(error?.response?.data?.message || error?.message || "Login failed. Please try again.");
@@ -29,6 +34,7 @@ const Login = () => {
             setLoading(false);
         }
     }
+
   return (
     <div className='w-screen h-screen'>
         <div className='flex flex-col items-center justify-center h-full border-2 border-gray-300 rounded-lg shadow-lg p-8 bg-white'>
