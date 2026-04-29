@@ -145,7 +145,7 @@ router.get('/history', protect, async (req, res) => {
 
 router.get('/questions', protect, async (req, res) => {
     try {
-        const page = parseInt(req.query.page) || 1; 
+        const page = Math.max(1, parseInt(req.query.page) || 1); 
         const limit = 10; 
         const skip = (page - 1) * limit; 
 
@@ -167,6 +167,6 @@ router.get('/questions', protect, async (req, res) => {
         console.error('Error fetching questions:', error);
         res.status(500).json({ message: 'Server error' });
     }
-})
+});
 
 module.exports = router;
