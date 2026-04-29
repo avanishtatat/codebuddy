@@ -143,4 +143,30 @@ router.get('/history', protect, async (req, res) => {
     }
 });
 
+router.get('/questions', protect, async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1; 
+        const limit = 10; 
+        const skip = (page - 1) * limit; 
+
+        // Get total count of user messages for pagination
+        const total = await Message.countDocuments({ userId: req.user.id, role: 'user' });
+
+        const userMessages = await Message.find({ userId: req.user.id, role: 'user' })
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+        
+        // Fetch AI reply for each question
+        const pairs = await Promise.all(userMessages.map(async (msg) => {
+            const reply = await Message.findOne({ userId: req.user.id, role: 'assistant', createdAt: { $gt: msg.createdAt }}).sort({ createdAt: 1 });
+            return { question: msg.content, answer: reply ? reply.content : 'No answer found' };
+        }))
+        return res.status(200).json({ pairs, totalQuestions: total, currentPage: page, totalPages: Math.ceil(total / limit) });
+    } catch (error) {
+        console.error('Error fetching questions:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+})
+
 module.exports = router;
