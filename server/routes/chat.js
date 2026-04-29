@@ -160,7 +160,7 @@ router.get('/questions', protect, async (req, res) => {
         // Fetch AI reply for each question
         const pairs = await Promise.all(userMessages.map(async (msg) => {
             const reply = await Message.findOne({ userId: req.user.id, role: 'assistant', createdAt: { $gt: msg.createdAt }}).sort({ createdAt: 1 });
-            return { question: msg.content, answer: reply ? reply.content : 'No answer found' };
+            return { question: msg.content, answer: reply ? reply.content : 'No answer found', askedAt: msg.createdAt  };
         }))
         return res.status(200).json({ pairs, totalQuestions: total, currentPage: page, totalPages: Math.ceil(total / limit) });
     } catch (error) {
