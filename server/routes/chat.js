@@ -41,7 +41,7 @@ router.post('/', protect, async (req, res) => {
 
         // Fetch the last 10 messages for context from the same user
         const recentMessages = await Message.find({ userId })
-            .sort({ createdAt: -1 })
+            .sort({ _id: -1 })
             .limit(10);
 
         // Reverse so oldest is first for claude context
@@ -134,7 +134,7 @@ router.get('/history', protect, async (req, res) => {
         if (!lastMessageDate || lastMessageDate.toDateString() !== today.toDateString()) {
             messagesUsedToday = 0;
         }
-        const messages = await Message.find({ userId }).sort({ createdAt: -1 }).limit(50);
+        const messages = await Message.find({ userId }).sort({ _id: -1 }).limit(50);
         messages.reverse(); // flip oldest first for better display
         res.status(200).json({ messages, messagesUsedToday });
     } catch (error) {
@@ -153,13 +153,13 @@ router.get('/questions', protect, async (req, res) => {
         const total = await Message.countDocuments({ userId: req.user.id, role: 'user' });
 
         const userMessages = await Message.find({ userId: req.user.id, role: 'user' })
-            .sort({ createdAt: -1 })
+            .sort({ _id: -1 })
             .skip(skip)
             .limit(limit);
         
         // Fetch AI reply for each question
         const pairs = await Promise.all(userMessages.map(async (msg) => {
-            const reply = await Message.findOne({ userId: req.user.id, role: 'assistant', createdAt: { $gt: msg.createdAt }}).sort({ createdAt: 1 });
+            const reply = await Message.findOne({ userId: req.user.id, role: 'assistant', _id: { $gt: msg._id }}).sort({ _id: 1 });
             return { question: msg.content, answer: reply ? reply.content : 'No answer found', askedAt: msg.createdAt  };
         }))
         return res.status(200).json({ pairs, totalQuestions: total, currentPage: page, totalPages: Math.ceil(total / limit) });
