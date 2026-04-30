@@ -72,7 +72,7 @@ const Home = () => {
           role: 'assistant',
           content: error.response?.data?.message || "Sorry, something went wrong. Please try again.",
         }
-      ])
+      ]);
     } finally {
       setIsLoading(false);
     }
