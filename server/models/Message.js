@@ -15,6 +15,10 @@ const messageSchema = new mongoose.Schema({
         type: String,
         required: true 
     },
+    replyTo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Message'
+    },
 }, { timestamps: true }); 
 
 module.exports = mongoose.model("Message", messageSchema);
