@@ -93,9 +93,11 @@ unrelated to coding, politely decline and redirect them to ask a coding question
         const session = await Message.startSession();
         session.startTransaction();
         try {
-            await Message.insertMany([
-                { userId, role: 'user', content: message },
-                { userId, role: 'assistant', content: assistantMessage }
+            const [userMessageDoc] = await Message.create([
+                { userId, role: 'user', content: message }
+            ], { session });
+            await Message.create([
+                { userId, role: 'assistant', content: assistantMessage, replyTo: userMessageDoc._id }
             ], { session });
             user.messagesUsedToday += 1;
             user.lastMessageDate = today;
@@ -156,12 +158,26 @@ router.get('/questions', protect, async (req, res) => {
             .sort({ _id: -1 })
             .skip(skip)
             .limit(limit);
-        
-        // Fetch AI reply for each question
-        const pairs = await Promise.all(userMessages.map(async (msg) => {
-            const reply = await Message.findOne({ userId: req.user.id, role: 'assistant', _id: { $gt: msg._id }}).sort({ _id: 1 });
-            return { question: msg.content, answer: reply ? reply.content : 'No answer found', askedAt: msg.createdAt  };
-        }))
+
+        const userMessageIds = userMessages.map((msg) => msg._id);
+        // Fetch corresponding assistant replies using the replyTo field
+        const assistantReplies = await Message.find({
+            userId: req.user.id,
+            role: 'assistant',
+            replyTo: { $in: userMessageIds }
+        }).select('content replyTo');
+
+        // Create a map of user message ID to assistant reply content for easy lookup
+        const replyByQuestionId = new Map(
+            assistantReplies.map((replyDoc) => [String(replyDoc.replyTo), replyDoc.content])
+        );
+
+        // Construct the response with question-answer pairs
+        const pairs = userMessages.map((msg) => ({
+            question: msg.content,
+            answer: replyByQuestionId.get(String(msg._id)) || 'No answer found',
+            askedAt: msg.createdAt
+        }));
         return res.status(200).json({ pairs, totalQuestions: total, currentPage: page, totalPages: Math.ceil(total / limit) });
     } catch (error) {
         console.error('Error fetching questions:', error);
