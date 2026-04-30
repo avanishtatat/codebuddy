@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import Navbar from "../components/Navbar";
 import WelcomeCard from "../components/WelcomeCard";
 import axiosInstance from "../api/axios";
@@ -12,27 +12,32 @@ const Home = () => {
   const [inputValue, setInputValue] = useState("");
   const [messagesUsed, setMessagesUsed] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [historyError, setHistoryError] = useState("");
   const bottomRef = useRef(null);
 
   const onChipClick = (example) => {
     setInputValue(example);
   };
 
+  const fetchChatHistory = useCallback(async () => {
+    setIsFetchingHistory(true);
+    try {
+      const historyResponse = await axiosInstance.get("/chat/history");
+      setMessages(historyResponse.data?.messages || []);
+      setMessagesUsed(historyResponse.data?.messagesUsedToday || 0);
+      setHistoryError("");
+    } catch (error) {
+      console.error("Error fetching chat history:", error);
+      setHistoryError("Could not load chat history.");
+    } finally {
+      setIsFetchingHistory(false);
+    }
+  }, []);
+
   // Fetch chat history on component mount
   useEffect(() => {
-    const fetchChatHistory = async () => {
-      try {
-        const historyResponse = await axiosInstance.get("/chat/history");
-        setMessages(historyResponse.data?.messages || []);
-        setMessagesUsed(historyResponse.data?.messagesUsedToday || 0);
-      } catch (error) {
-        console.error("Error fetching chat history:", error);
-      } finally {
-        setIsFetchingHistory(false);
-      }
-    };
     fetchChatHistory();
-  }, []);
+  }, [fetchChatHistory]);
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -61,6 +66,13 @@ const Home = () => {
       setMessagesUsed(response.data?.messagesUsedToday || messagesUsed);
     } catch (error) {
       console.error("Error sending message:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: error.response?.data?.message || "Sorry, something went wrong. Please try again.",
+        }
+      ])
     } finally {
       setIsLoading(false);
     }
@@ -76,6 +88,19 @@ const Home = () => {
               <div className="flex flex-col items-center gap-3 text-gray-400">
                 <Loader className="animate-spin" size={28} />
                 <p className="text-sm">Loading your conversations...</p>
+              </div>
+            </div>
+          ) : historyError && messages.length === 0 ? (
+            <div className="w-15/16 md:w-5/6 mx-auto mt-6">
+              <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 flex items-center justify-between gap-3">
+                <p className="text-sm">{historyError}</p>
+                <button
+                  type="button"
+                  onClick={fetchChatHistory}
+                  className="text-sm font-semibold text-red-700 hover:underline hover:underline-offset-2 hover:text-red-800 cursor-pointer"
+                >
+                  Retry
+                </button>
               </div>
             </div>
           ) : (

@@ -1,6 +1,6 @@
 import { useAuth } from "../context/AuthContext";
 import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'; 
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Loader } from "lucide-react";
 
@@ -15,26 +15,39 @@ const userAvatar = (name) => {
     return <span className='bg-green-100 text-green-500 rounded-full w-8 h-8 px-2 flex items-center justify-center text-sm font-semibold order-1'>{initials}</span>
 }
 
+export const MarkdownPre = ({ children }) => {
+  return <>{children}</>;
+};
+
+export const MarkdownCode = ({ className, children, ...props }) => {
+  const isBlock = /^language-/.test(className || '');
+
+  if (isBlock) {
+    const language = className.replace(/^language-/, '');
+    return (
+      <SyntaxHighlighter
+        style={oneDark}
+        language={language}
+        PreTag="div"
+        className="text-[10px] md:text-sm rounded-lg max-w-full overflow-x-auto"
+        {...props}
+      >
+        {String(children).replace(/\n$/, '')}
+      </SyntaxHighlighter>
+    );
+  }
+
+  return (
+    <code className="bg-gray-100 px-1 rounded text-[12px] md:text-sm overflow-x-auto" {...props}>
+      {children}
+    </code>
+  );
+};
+
 const components = {
-    code({node, inline, className, children, ...props}){
-        const match = /language-(\w+)/.exec(className || '');
-        return !inline && match ? (
-            <SyntaxHighlighter
-                style={oneDark}
-                language={match[1]}
-                PreTag="div"
-                className="text-[10px] md:text-sm rounded-lg max-w-full overflow-x-auto"
-                {...props}
-            >
-                {String(children).replace(/\n$/, '')}
-            </SyntaxHighlighter>
-        ) : (
-            <code className='bg-gray-100 px-1 rounded text-[12px] md:text-sm overflow-x-auto' {...props}>
-                {children}
-            </code>
-        )
-    }
-}
+  pre: MarkdownPre,
+  code: MarkdownCode
+};
 const MessageBubble = ({ role, content, loading }) => {
     const { user } = useAuth();
   return (

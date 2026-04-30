@@ -5,7 +5,7 @@ const ChatInput = ({ value, onChange, onSend, isLoading, messagesUsed }) => {
     <div className='w-full bg-white shadow-lg border-t border-t-gray-100 flex flex-col items-center p-3'>
         <div className='w-full max-w-15/16 md:max-w-5/6 mx-auto flex items-center gap-4'>
             <textarea
-                row={1}
+                rows={1}
                 className='flex-1 h-auto max-h-40 overflow-y-auto px-4 py-2 rounded-lg border resize-none focus:outline-none focus:ring-2 focus:ring-blue-500'
                 placeholder={messagesUsed >= 20 ? "Message limit reached for today. Please try again tomorrow." : "Ask a coding question..."}
                 value={value}
