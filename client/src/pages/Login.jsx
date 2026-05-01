@@ -8,10 +8,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { login } = useAuth();
+  const { login, token } = useAuth();
   const navigate = useNavigate();
-  const { token } = useAuth();
-
+  
   if (token) {
     return <Navigate to="/" />;
   }
@@ -26,11 +25,11 @@ const Login = () => {
       setError(null);
       login({ name }, token);
       navigate("/");
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (err) {
+      console.error("Login error:", err);
       setError(
-        error?.response?.data?.message ||
-          error?.message ||
+        err?.response?.data?.message ||
+          err?.message ||
           "Login failed. Please try again.",
       );
     } finally {
@@ -83,7 +82,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               type="password"
               placeholder="********"
-              autoComplete="new-password"
+              autoComplete="current-password"
               className="px-6 m-auto w-full h-full rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:border-gray-500"
               required
               minLength={8}
