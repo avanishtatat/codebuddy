@@ -6,10 +6,12 @@ export const MarkdownPre = ({ children }) => {
 };
 
 export const MarkdownCode = ({ className, children, ...props }) => {
-  const isBlock = /^language-/.test(className || '');
+  const hasLanguage = /^language-/.test(className || '');
+  const isMultiLine = children && String(children).includes('\n');
+  const isBlock = hasLanguage || isMultiLine;
 
   if (isBlock) {
-    const language = className.replace(/^language-/, '');
+    const language = hasLanguage ? className.replace(/^language-/, '') : 'text';
     return (
       <SyntaxHighlighter
         style={oneDark}

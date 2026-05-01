@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp, Loader } from 'lucide-react';
-import { useState } from 'react';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import axiosInstance from '../api/axios';
 import ReactMarkdown from 'react-markdown';
 import { markdownComponents } from '../utils/reactMarkdownHelper';
@@ -25,7 +24,7 @@ const History = () => {
         setPairs(groupedByDates(fetchedPairs));
         setCurrentPage(fetchedCurrentPage);
         setTotalPages(fetchedTotalPages);
-        setIsLoading(false);
+        setError('');
       } catch (err) {
         setError(err?.message || "Failed to fetch questions");
       } finally {
@@ -35,7 +34,6 @@ const History = () => {
     fetchQuestions();
   }, [currentPage]);
 
-  console.log('Pairs:', pairs);
   
 
   return (
@@ -76,15 +74,15 @@ const History = () => {
                     <h2 className="text-[13px] text-gray-400 mb-2 uppercase font-semibold">{date}</h2>
                     <div className="flex flex-col gap-4 overflow-y-auto">
                       {pairs[date].map((pair, idx) => (
-                        <div key={idx} onClick={() => setOpenIndex(openIndex === idx ? null : idx)} className="shadow rounded-xl bg-gray-100 border border-gray-200">
-                          <div className={`px-4 py-3 bg-white flex items-center justify-between ${openIndex === idx ? 'rounded-t-xl border-b border-b-gray-200' : 'rounded-xl'} cursor-pointer`}>
+                        <div key={`${date}-${idx}`} onClick={() => setOpenIndex(openIndex === `${date}-${idx}` ? null : `${date}-${idx}`)} className="shadow rounded-xl bg-gray-100 border border-gray-200">
+                          <div className={`px-4 py-3 bg-white flex items-center justify-between ${openIndex === `${date}-${idx}` ? 'rounded-t-xl border-b border-b-gray-200' : 'rounded-xl'} cursor-pointer`}>
                             <p className="text-sm md:text-[16px] font-medium mt-1"><span className='h-8 w-8 rounded-full text-blue-400 bg-blue-100 px-3 py-1.5 mr-2'>?</span>{pair.question}</p>
                             <div className='flex items-center gap-2'>
                               <p className="text-sm text-gray-500">{date === 'Today' ? new Date(pair.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : date}</p>
-                              {openIndex === idx ? <ChevronUp size={16} className='text-gray-400 font-medium' /> : <ChevronDown size={16} className="text-gray-400 font-medium" />}
+                              {openIndex === `${date}-${idx}` ? <ChevronUp size={16} className='text-gray-400 font-medium' /> : <ChevronDown size={16} className="text-gray-400 font-medium" />}
                             </div>  
                           </div>
-                          {openIndex === idx && <div className="bg-transparent max-h-80 overflow-y-auto rounded-b-lg p-4 mt-2 border border-gray-100">
+                          {openIndex === `${date}-${idx}` && <div className="bg-transparent max-h-80 overflow-y-auto rounded-b-lg p-4 mt-2 border border-gray-100">
                             <ReactMarkdown components={markdownComponents}>
                               {pair.answer}
                             </ReactMarkdown>
