@@ -97,20 +97,22 @@ const History = () => {
                             key={`${date}-${idx}`}
                             role="button"
                             tabIndex={0}
-                            onClick={() =>
+                            onClick={() => {
+                              const key = `${date}-${idx}`;
                               setOpenIndex(
-                                openIndex === `${date}-${idx}`
+                                openIndex === key
                                   ? null
-                                  : `${date}-${idx}`,
-                              )
-                            }
+                                  : key,
+                              );
+                            }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
+                                const key = `${date}-${idx}`;
                                 setOpenIndex(
-                                  openIndex === `${date}-${idx}` 
-                                    ? null 
-                                    : `${date}-${idx}`
+                                  openIndex === key
+                                    ? null
+                                    : key
                                 )
                               }
                             }}
