@@ -28,11 +28,13 @@ const History = () => {
           totalPages: fetchedTotalPages,
         } = response.data;
         setPairs(groupedByDates(fetchedPairs));
-        setCurrentPage(fetchedCurrentPage);
+        if (fetchedCurrentPage !== currentPage) {
+          setCurrentPage(fetchedCurrentPage);
+        }
         setTotalPages(fetchedTotalPages);
         setError("");
       } catch (err) {
-        setError(err?.message || "Failed to fetch questions");
+        setError(err?.response?.data?.message || err?.message || "Failed to fetch questions");
       } finally {
         setIsLoading(false);
       }
@@ -84,8 +86,8 @@ const History = () => {
                     </p>
                   </div>
                 ) : (
-                  Object.keys(pairs).map((date, index) => (
-                    <div key={index} className="mt-6">
+                  Object.keys(pairs).map((date) => (
+                    <div key={date} className="mt-6">
                       <h2 className="text-[13px] text-gray-400 mb-2 uppercase font-semibold">
                         {date}
                       </h2>
@@ -93,6 +95,8 @@ const History = () => {
                         {pairs[date].map((pair, idx) => (
                           <div
                             key={`${date}-${idx}`}
+                            role="button"
+                            tabIndex={0}
                             onClick={() =>
                               setOpenIndex(
                                 openIndex === `${date}-${idx}`
@@ -100,6 +104,16 @@ const History = () => {
                                   : `${date}-${idx}`,
                               )
                             }
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setOpenIndex(
+                                  openIndex === `${date}-${idx}` 
+                                    ? null 
+                                    : `${date}-${idx}`
+                                )
+                              }
+                            }}
                             className="shadow rounded-xl bg-gray-100 border border-gray-200"
                           >
                             <div
