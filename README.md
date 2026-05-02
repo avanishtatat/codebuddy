@@ -24,7 +24,7 @@
 
 ## Live Demo
 - Live URL: https://avanish-codebuddy.vercel.app
-- GitHub Repo: https://github.com/AvanishTiwari18/codebuddy
+- GitHub Repo: https://github.com/avanishtatat/codebuddy
 
 ## About
 CodeBuddy is an AI-powered coding assistant web app built for beginner and intermediate developers. It helps users debug code, understand programming concepts, and generate coding solutions with clear responses and syntax-highlighted formatting. The app includes secure authentication, daily usage control, and persistent chat history for a practical learning workflow.
@@ -157,7 +157,7 @@ Users register or log in to receive a JWT token, then ask coding questions in th
 - Role: NxtWave MERN developer
 - Status: Currently open to work
 - LinkedIn: https://www.linkedin.com/in/avanishtiwari18
-- GitHub: https://github.com/AvanishTiwari18/codebuddy
+- GitHub: https://github.com/avanishtatat/codebuddy
 
 ## License
 This project is licensed under the MIT License.
