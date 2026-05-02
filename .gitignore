@@ -1,0 +1,18 @@
+# Python
+.venv
+
+# Postman
+.postman
+postman
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode
+.idea
+
+# Env files (safety net)
+.env
+*.env
