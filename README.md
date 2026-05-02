@@ -137,6 +137,8 @@ codebuddy/
 │   ├── routes/
 │   ├── server.js
 │   └── package.json
+├── screenshots/
+│   └──  PLACEHOLDER.md
 └── README.md
 ```
 
