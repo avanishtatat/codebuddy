@@ -5,6 +5,7 @@ import axiosInstance from "../api/axios";
 import MessageBubble from "../components/MessageBubble";
 import ChatInput from "../components/ChatInput";
 import { Loader } from "lucide-react";
+import { use } from "react";
 
 const Home = () => {
   const [isFetchingHistory, setIsFetchingHistory] = useState(true);
@@ -17,6 +18,10 @@ const Home = () => {
 
   const onChipClick = useCallback((example) => {
     setChipText(example);
+  }, []);
+
+  const handleChipUsed = useCallback(() => {
+    setChipText("");
   }, []);
 
   const fetchChatHistory = useCallback(async () => {
@@ -63,7 +68,7 @@ const Home = () => {
           "Sorry, I had trouble generating a response.",
       };
       setMessages((prev) => [...prev, aiMessage]);
-      setMessagesUsed(response.data?.messagesUsedToday || messagesUsed);
+      setMessagesUsed((prev) => response.data?.messagesUsedToday || prev);
     } catch (error) {
       console.error("Error sending message:", error);
       setMessages((prev) => [
@@ -123,7 +128,7 @@ const Home = () => {
           isLoading={isLoading}
           messagesUsed={messagesUsed}
           chipText={chipText}
-          onChipUsed={() => setChipText("")}
+          onChipUsed={handleChipUsed}
         />
       </div>
     </div>
