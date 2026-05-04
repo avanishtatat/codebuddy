@@ -5,7 +5,6 @@ import axiosInstance from "../api/axios";
 import MessageBubble from "../components/MessageBubble";
 import ChatInput from "../components/ChatInput";
 import { Loader } from "lucide-react";
-import { use } from "react";
 
 const Home = () => {
   const [isFetchingHistory, setIsFetchingHistory] = useState(true);
@@ -81,7 +80,7 @@ const Home = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, messagesUsed]);
+  }, [isLoading]);
 
   return (
     <div className="bg-gray-100 h-screen w-full">
