@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useAuth } from "../context/AuthContext";
 import ReactMarkdown from 'react-markdown';
 import { Loader } from "lucide-react";
@@ -14,7 +15,7 @@ const userAvatar = (name) => {
     return <span className='bg-green-100 text-green-500 rounded-full w-8 h-8 px-2 flex items-center justify-center text-sm font-semibold order-1'>{initials}</span>
 }
 
-const MessageBubble = ({ role, content, loading }) => {
+const MessageBubble = memo(({ role, content, loading }) => {
     const { user } = useAuth();
   return (
     <div className={`${role === 'assistant' ? 'self-start' : 'self-end'} w-fit max-w-14/15 md:max-w-4/5 flex gap-3`}>
@@ -27,6 +28,7 @@ const MessageBubble = ({ role, content, loading }) => {
       </div>
     </div>
   )
-}
+})
 
 export default MessageBubble
+MessageBubble.displayName = "MessageBubble";

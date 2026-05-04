@@ -9,15 +9,15 @@ import { Loader } from "lucide-react";
 const Home = () => {
   const [isFetchingHistory, setIsFetchingHistory] = useState(true);
   const [messages, setMessages] = useState([]);
-  const [inputValue, setInputValue] = useState("");
+  const [chipText, setChipText] = useState("");
   const [messagesUsed, setMessagesUsed] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [historyError, setHistoryError] = useState("");
   const bottomRef = useRef(null);
 
-  const onChipClick = (example) => {
-    setInputValue(example);
-  };
+  const onChipClick = useCallback((example) => {
+    setChipText(example);
+  }, []);
 
   const fetchChatHistory = useCallback(async () => {
     setIsFetchingHistory(true);
@@ -46,11 +46,11 @@ const Home = () => {
     }
   }, [messages]);
 
-  const handleSend = async () => {
+  const handleSend = useCallback(async (inputValue) => {
     if (!inputValue.trim() || isLoading) return;
     const userMessage = { role: "user", content: inputValue.trim() };
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
+    setChipText("");
     setIsLoading(true);
     try {
       const response = await axiosInstance.post("/chat", {
@@ -76,7 +76,7 @@ const Home = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [isLoading, messagesUsed]);
 
   return (
     <div className="bg-gray-100 h-screen w-full">
@@ -109,7 +109,7 @@ const Home = () => {
           {/* Messages will be displayed here */}
           <div className="w-15/16 md:w-5/6 mx-auto mt-6 flex flex-col gap-6">
             {messages.map((msg, idx) => (
-              <MessageBubble key={idx} role={msg.role} content={msg.content} />
+              <MessageBubble key={msg._id || `${msg.role}-${idx}`} role={msg.role} content={msg.content} />
             ))}
             {isLoading && (
               <MessageBubble role="assistant" content="" loading={true} />
@@ -119,11 +119,11 @@ const Home = () => {
         </div>
         {/* Input will go here */}
         <ChatInput
-          value={inputValue}
-          onChange={setInputValue}
           onSend={handleSend}
           isLoading={isLoading}
           messagesUsed={messagesUsed}
+          chipText={chipText}
+          onChipUsed={() => setChipText("")}
         />
       </div>
     </div>
