@@ -1,9 +1,10 @@
+import { memo } from "react";
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 
-const Navbar = ({messagesUsed}) => {
+const Navbar = memo(({messagesUsed}) => {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const {logout} = useAuth();
   return (
@@ -30,6 +31,7 @@ const Navbar = ({messagesUsed}) => {
         </div>
     </nav>
   )
-}
+})
 
 export default Navbar
+Navbar.displayName = "Navbar";

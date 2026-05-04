@@ -1,6 +1,22 @@
 import { Send } from 'lucide-react'
+import { useEffect, useState } from 'react';
 
-const ChatInput = ({ value, onChange, onSend, isLoading, messagesUsed }) => {
+const ChatInput = ({ chipText, onChipUsed, onSend, isLoading, messagesUsed }) => {
+    const [value, setValue] = useState("");
+
+    useEffect(() => {
+        if (chipText) {
+            setValue(chipText);
+            onChipUsed();
+        }
+    }, [chipText, onChipUsed]);
+
+    const handleSend = () => {
+        if (!value.trim() || isLoading || messagesUsed >= 20) return;
+        onSend(value.trim());
+        setValue("");
+    }
+    
   return (
     <div className='w-full bg-white shadow-lg border-t border-t-gray-100 flex flex-col items-center p-3'>
         <div className='w-full max-w-15/16 md:max-w-5/6 mx-auto flex items-center gap-4'>
@@ -10,7 +26,7 @@ const ChatInput = ({ value, onChange, onSend, isLoading, messagesUsed }) => {
                 placeholder={messagesUsed >= 20 ? "Message limit reached for today. Please try again tomorrow." : "Ask a coding question..."}
                 value={value}
                 onChange={(e) => {
-                    onChange(e.target.value);
+                    setValue(e.target.value);
                     // Auto-resize the textarea
                     e.target.style.height = 'auto';
                     e.target.style.height = Math.min(e.target.scrollHeight, 160) + 'px'; // Limit max height to 160px (10 rows)
@@ -19,14 +35,14 @@ const ChatInput = ({ value, onChange, onSend, isLoading, messagesUsed }) => {
                 onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        onSend();
+                        handleSend();
                     }
                 }}
                 disabled={isLoading || messagesUsed >= 20}
             ></textarea>
             <button 
                 className={`px-4 py-3 rounded-lg text-white cursor-pointer self-end ${isLoading || messagesUsed >= 20 ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}`}
-                onClick={onSend}
+                onClick={handleSend}
                 disabled={isLoading || messagesUsed >= 20}
             >
                 <Send size={18} />
